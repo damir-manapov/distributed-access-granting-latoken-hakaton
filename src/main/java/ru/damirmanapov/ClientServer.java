@@ -25,7 +25,7 @@ import java.util.function.Consumer;
 
 public class ClientServer {
 
-    public static void startServer() {
+    public static void startServer(Peer peer) {
 
         Properties properties = new Properties();
         NettyOptions nettyProperties = new NettyOptions(properties);
@@ -36,11 +36,25 @@ public class ClientServer {
 
         context.executor().execute(() -> {
             try {
-                server.listen(new Address(new InetSocketAddress(InetAddress.getByName("localhost"), 5555)), connection -> {
+                server.listen(new Address(new InetSocketAddress(InetAddress.getByName(peer.getHost()), peer.getPort())), connection -> {
+
                     connection.handler(TestMessage.class, testMessage -> {
                         System.out.println(testMessage);
-                        return CompletableFuture.completedFuture("Hello world back!");
+                        return CompletableFuture.completedFuture("TestMessage");
                     });
+                    connection.handler(PutPartialKeyMessage.class, testMessage -> {
+                        System.out.println(testMessage);
+                        return CompletableFuture.completedFuture("PutPartialKeyMessage");
+                    });
+                    connection.handler(GetPartialKeyMessage.class, testMessage -> {
+                        System.out.println(testMessage);
+                        return CompletableFuture.completedFuture("GetPartialKeyMessage");
+                    });
+                    connection.handler(GetPartialKeyForRedistributionMessage.class, testMessage -> {
+                        System.out.println(testMessage);
+                        return CompletableFuture.completedFuture("GetPartialKeyForRedistributionMessage");
+                    });
+
                 });
             } catch (UnknownHostException e) {
                 System.out.println(e);
@@ -76,6 +90,7 @@ public class ClientServer {
         serializer.register(PutPartialKeyMessage.class, 1);
         serializer.register(GetPartialKeyMessage.class, 2);
         serializer.register(GetPartialKeyForRedistributionMessage.class, 3);
+        serializer.register(TestMessage.class, 4);
 
         return serializer;
     }

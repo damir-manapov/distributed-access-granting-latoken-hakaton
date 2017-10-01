@@ -11,7 +11,7 @@ import io.atomix.catalyst.transport.Server;
 import io.atomix.catalyst.transport.Transport;
 import io.atomix.catalyst.transport.netty.NettyOptions;
 import io.atomix.catalyst.transport.netty.NettyTransport;
-import ru.damirmanapov.messages.TestMessage;
+import ru.damirmanapov.messages.*;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -32,21 +32,39 @@ public class Sidechain {
             System.out.println("argument: " + s);
         }
 
+        Peer peer = new Peer();
+        peer.setHost("localhost");
+        peer.setPort(33333);
+
         switch (args[0]) {
             case "test":
                 System.out.println("test");
                 break;
             case "server":
-                startServer();
+                ClientServer.startServer(peer);
                 break;
             case "firstMessage":
-                System.out.println("firstMessage");
-                sendMessage("TestMessage 1");
+                ClientServer.sendMessage(peer, new GetPartialKeyForRedistributionMessage(1), action -> System.out.println(action));
                 break;
             case "secondMessage":
                 System.out.println("secondMessage");
                 sendMessage("TestMessage 2");
                 break;
+            default:
+                CatalystSerializable message = null;
+                switch (args[0]) {
+                    case "put":
+                        message = new PutPartialKeyMessage(args[1]);
+                        break;
+                    case "get":
+                        message = new GetPartialKeyMessage(Integer.parseInt(args[1]));
+                        break;
+                    case "redistribution":
+                        message = new GetPartialKeyForRedistributionMessage(Integer.parseInt(args[1]));
+                        break;
+                }
+                ClientServer.sendMessage(peer, message, action -> System.out.println(action));
+
 
         }
     }
@@ -58,16 +76,27 @@ public class Sidechain {
         Transport transport = new NettyTransport(nettyProperties);
         Server server = transport.server();
 
-        Serializer serializer = new Serializer(new UnpooledHeapAllocator());
-        serializer.register(TestMessage.class, 1);
+        Serializer serializer = ClientServer.getSerializer();
         ThreadContext context = new SingleThreadContext("test-thread-%d", serializer);
 
         context.executor().execute(() -> {
             try {
                 server.listen(new Address(new InetSocketAddress(InetAddress.getByName("localhost"), 5555)), connection -> {
-                    connection.handler(CatalystSerializable.class, testMessage -> {
+                    connection.handler(TestMessage.class, testMessage -> {
                         System.out.println(testMessage);
-                        return CompletableFuture.completedFuture("Hello world back!");
+                        return CompletableFuture.completedFuture("TestMessage");
+                    });
+                    connection.handler(PutPartialKeyMessage.class, testMessage -> {
+                        System.out.println(testMessage);
+                        return CompletableFuture.completedFuture("PutPartialKeyMessage");
+                    });
+                    connection.handler(GetPartialKeyMessage.class, testMessage -> {
+                        System.out.println(testMessage);
+                        return CompletableFuture.completedFuture("GetPartialKeyMessage");
+                    });
+                    connection.handler(GetPartialKeyForRedistributionMessage.class, testMessage -> {
+                        System.out.println(testMessage);
+                        return CompletableFuture.completedFuture("GetPartialKeyForRedistributionMessage");
                     });
                 });
             } catch (UnknownHostException e) {
@@ -85,15 +114,20 @@ public class Sidechain {
 
         Client client = transport.client();
 
-        ThreadContext context = new SingleThreadContext("test-thread-%d", new Serializer());
+
+        Serializer serializer = ClientServer.getSerializer();
+//        Serializer serializer = new Serializer(new UnpooledHeapAllocator());
+//        serializer.register(TestMessage.class, 1);
+
+        ThreadContext context = new SingleThreadContext("test-thread-%d", serializer);
 
         context.executor().execute(() -> {
             try {
 
-                Serializer serializer = new Serializer(new UnpooledHeapAllocator());
-                serializer.register(TestMessage.class, 1);
+//                Serializer serializer = new Serializer(new UnpooledHeapAllocator());
+//                serializer.register(TestMessage.class, 1);
 
-                TestMessage testMessage = new TestMessage(messageName);
+                TestMessage testMessage = (new TestMessage(messageName));
 
                 client.connect(new Address(new InetSocketAddress(InetAddress.getByName("localhost"), 5555))).thenAccept(connection -> {
                     connection.sendAndReceive(testMessage).thenAccept(response -> {

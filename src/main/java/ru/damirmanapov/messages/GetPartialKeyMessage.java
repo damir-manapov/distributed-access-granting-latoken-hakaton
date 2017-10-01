@@ -30,7 +30,7 @@ public class GetPartialKeyMessage implements CatalystSerializable {
 
     @Override
     public String toString() {
-        return "GetPartialKeyForRedistributionMessage{" +
+        return "GetPartialKeyMessage{" +
                 "partialIndex='" + partialIndex + '\'' +
                 '}';
     }

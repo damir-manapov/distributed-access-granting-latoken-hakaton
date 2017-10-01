@@ -1,5 +1,11 @@
 node_modules
 
+target/
+!.mvn/wrapper/maven-wrapper.jar
+*.log
+dependency-reduced-pom.xml
+app.log.*
+
 ### IntelliJ IDEA ###
 .idea
 *.iws

@@ -52,3 +52,6 @@ Ethereum sidechain for distributed authorized authenticated file access
 * splitKey(key)
 
 * defineNodesForKey(pertialKey)
+
+Libs
+* https://github.com/web3j/web3j

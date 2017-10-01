@@ -21,24 +21,6 @@ public class RendezvousHashing {
             destinationHashes.put(nodeIs, bytesToHex(SHA3_256.hash(concatenation.getBytes(StandardCharsets.UTF_8))));
         }
 
-//        for (int i = 0; i < 32; i++) {
-//
-//            byte maxByte = Byte.MIN_VALUE;
-//
-//            for (Map.Entry<String, byte[]> destinationHash : destinationHashes.entrySet()) {
-//                maxByte = (byte) Math.max(maxByte, destinationHash.getValue()[i]);
-//            }
-//
-//            Iterator<Map.Entry<String, byte[]>> iter = destinationHashes.entrySet().iterator();
-//            while (iter.hasNext()) {
-//                Map.Entry<String, byte[]> entry = iter.next();
-//                if (entry.getValue()[i] < maxByte) {
-//                    iter.remove();
-//                }
-//            }
-//
-//        }
-
         destinationHashes.entrySet().stream().sorted((x1, x2) -> destinationHashes.get(x1).compareToIgnoreCase(destinationHashes.get(x2)));
 
         if (destinationHashes.size() == 0) {

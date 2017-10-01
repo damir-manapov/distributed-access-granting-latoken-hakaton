@@ -5,6 +5,7 @@ import io.atomix.catalyst.buffer.UnpooledHeapAllocator;
 import io.atomix.catalyst.serializer.Serializer;
 import net.jodah.concurrentunit.ConcurrentTestCase;
 import org.testng.annotations.Test;
+import ru.damirmanapov.messages.TestMessage;
 
 import java.util.concurrent.TimeoutException;
 
@@ -18,14 +19,14 @@ public class SerializationTest extends ConcurrentTestCase {
     public void testGetSomething() throws TimeoutException {
 
         Serializer serializer = new Serializer(new UnpooledHeapAllocator());
-        serializer.register(Message.class, 1);
+        serializer.register(TestMessage.class, 1);
 
-        Message originalMessage = new Message("Message 1");
-        Buffer buffer = serializer.writeObject(originalMessage);
+        TestMessage originalTestMessage = new TestMessage("TestMessage 1");
+        Buffer buffer = serializer.writeObject(originalTestMessage);
         buffer.flip();
-        Message deserializedMessage = serializer.readObject(buffer);
+        TestMessage deserializedTestMessage = serializer.readObject(buffer);
 
-        assertThat(deserializedMessage, samePropertyValuesAs(originalMessage));
+        assertThat(deserializedTestMessage, samePropertyValuesAs(originalTestMessage));
     }
 
 }

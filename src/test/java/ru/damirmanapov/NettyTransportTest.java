@@ -12,6 +12,7 @@ import io.atomix.catalyst.transport.netty.NettyOptions;
 import io.atomix.catalyst.transport.netty.NettyTransport;
 import net.jodah.concurrentunit.ConcurrentTestCase;
 import org.testng.annotations.Test;
+import ru.damirmanapov.messages.TestMessage;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -89,15 +90,15 @@ public class NettyTransportTest extends ConcurrentTestCase {
         Client client = transport.client();
 
         Serializer serializer = new Serializer(new UnpooledHeapAllocator());
-        serializer.register(Message.class, 1);
+        serializer.register(TestMessage.class, 1);
         ThreadContext context = new SingleThreadContext("test-thread-%d", serializer);
 
         context.executor().execute(() -> {
             try {
                 server.listen(new Address(new InetSocketAddress(InetAddress.getByName("localhost"), 4444)), connection -> {
-                    connection.handler(Message.class, message -> {
-                        threadAssertEquals("Message", message.getName());
-                        System.out.println(message);
+                    connection.handler(TestMessage.class, testMessage -> {
+                        threadAssertEquals("TestMessage", testMessage.getName());
+                        System.out.println(testMessage);
                         return CompletableFuture.completedFuture("Hello world back!");
                     });
                 }).thenRun(this::resume);
@@ -110,10 +111,10 @@ public class NettyTransportTest extends ConcurrentTestCase {
         context.executor().execute(() -> {
             try {
 
-                Message message = new Message("Message");
+                TestMessage testMessage = new TestMessage("TestMessage");
 
                 client.connect(new Address(new InetSocketAddress(InetAddress.getByName("localhost"), 4444))).thenAccept(connection -> {
-                    connection.sendAndReceive(message).thenAccept(response -> {
+                    connection.sendAndReceive(testMessage).thenAccept(response -> {
                         threadAssertEquals("Hello world back!", response);
                         resume();
                     });

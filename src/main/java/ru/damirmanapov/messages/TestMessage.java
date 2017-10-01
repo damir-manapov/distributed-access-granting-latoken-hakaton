@@ -1,18 +1,18 @@
-package ru.damirmanapov;
+package ru.damirmanapov.messages;
 
 import io.atomix.catalyst.buffer.BufferInput;
 import io.atomix.catalyst.buffer.BufferOutput;
 import io.atomix.catalyst.serializer.CatalystSerializable;
 import io.atomix.catalyst.serializer.Serializer;
 
-public class Message implements CatalystSerializable {
+public class TestMessage implements CatalystSerializable {
 
     private String name;
 
-    public Message() {
+    public TestMessage() {
     }
 
-    public Message(String name) {
+    public TestMessage(String name) {
         this.name = name;
     }
 
@@ -26,7 +26,7 @@ public class Message implements CatalystSerializable {
 
     @Override
     public String toString() {
-        return "Message{" +
+        return "TestMessage{" +
                 "name='" + name + '\'' +
                 '}';
     }

@@ -42,13 +42,13 @@ Ethereum sidechain for distributed authorized authenticated file access
   * Владеющая нода при запросе так же обновляет статус здоровью остальных владеющих нод и нод, находящихся в очереди на владение перед нами
   * Если с учетом обновления их статуса нода, которую мы запросили, так же приходит к выводу что мы становимся владеющей нодой она возвращает нам значение
 
-getPartialKey(publicKey, sign)
-	isAuthenticated
-	satisfiesConditions
-	return partialKey
+* getPartialKey(publicKey, sign)
+  * isAuthenticated
+  * satisfiesConditions
+  * return partialKey
 
-putPartialKey(partialKey, contractAddress)
+* putPartialKey(partialKey, contractAddress)
 
-splitKey(key)
+* splitKey(key)
 
-defineNodesForKey(pertialKey)
+* defineNodesForKey(pertialKey)
